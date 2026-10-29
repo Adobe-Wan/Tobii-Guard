@@ -1,0 +1,50 @@
+# Builds the release zip and SHA256SUMS.txt from a version tag (v*).
+# Uses no third-party actions: only the git, zip, sha256sum and gh tools
+# that come preinstalled on GitHub's Ubuntu runners.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write   # needed only to create the GitHub release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the tagged commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git clone --depth 1 --branch "$GITHUB_REF_NAME" \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" src
+
+      - name: Build zip and checksums
+        working-directory: src
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          # The script's VERSION constant must match the tag
+          grep -q "^VERSION := \"${version}\"" tobii-guard.ahk
+          name="tobii-guard-v${version}"
+          mkdir "../${name}"
+          cp tobii-guard.ahk README.md SECURITY.md LICENSE CHANGELOG.md "../${name}/"
+          cd ..
+          # Fixed timestamps so the zip is reproducible
+          find "${name}" -exec touch -d "@$(git -C src log -1 --format=%ct)" {} +
+          zip -X -r "${name}.zip" "${name}"
+          sha256sum "${name}.zip" "${name}/tobii-guard.ahk" | sed "s#${name}/##" > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          gh release create "$GITHUB_REF_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Tobii Guard ${version}" \
+            --notes-file src/CHANGELOG.md \
+            "tobii-guard-v${version}.zip" SHA256SUMS.txt

@@ -53,6 +53,7 @@ if A_IsAdmin {
 
 paused := false
 skipping := false
+lastIssuePid := 0   ; logs a stuck process once, not every check
 
 BuildTrayMenu()
 Log("started v" VERSION)
@@ -60,7 +61,7 @@ SetTimer(Check, CHECK_INTERVAL_MS)
 Check()
 
 Check() {
-    global skipping
+    global skipping, lastIssuePid
     if paused
         return
 
@@ -81,15 +82,20 @@ Check() {
         path := ""
         try path := ProcessGetPath(pid)
         if !IsAllowedPath(path) {
-            Log("not ending pid " pid ": unexpected path '" path "'")
+            if (lastIssuePid != pid)
+                Log("not ending pid " pid ": unexpected path '" path "'")
+            lastIssuePid := pid
             return
         }
 
         try ProcessClose(pid)
         if ProcessWaitClose(pid, 2) {
-            Log("could not end " TARGET_EXE " (pid " pid ")")
+            if (lastIssuePid != pid)
+                Log("could not end " TARGET_EXE " (pid " pid ")")
+            lastIssuePid := pid
             return
         }
+        lastIssuePid := 0
         Log("ended " TARGET_EXE " (pid " pid ")")
     }
 }

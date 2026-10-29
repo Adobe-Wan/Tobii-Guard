@@ -1,0 +1,3 @@
+# Windows scripts keep CRLF line endings in the working tree and release zip
+*.ahk text eol=crlf
+*.md  text eol=lf

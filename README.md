@@ -62,7 +62,15 @@ The only files it writes:
 | Path | When |
 |---|---|
 | `%LOCALAPPDATA%\TobiiGuard\log.txt` (and `log.txt.old`, max ~100 KB each) | always |
-| `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\Tobii Guard.lnk` | only if you tick **Start with Windows** in the tray menu |
+| `%LOCALAPPDATA%\TobiiGuard\setup-done` (empty file) | after the first-run question, so it is asked only once |
+| `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\Tobii Guard.lnk` | only if you answer **Yes** on first run or tick **Start with Windows** in the tray menu |
+
+## Why not just delete or rename the Tobii file?
+
+- It lives in `Program Files`, so changing it needs administrator rights and modifies Tobii's own installation.
+- Tobii updates and repairs put the file back, so the problem silently returns.
+- Tobii Experience would show its troubleshooter all the time. Tobii Guard lets Interaction run while you have the app open and removes it only when you close the app.
+- Undoing Tobii Guard is one click, and no Tobii file is ever touched.
 
 ## Trade-offs
 
@@ -84,7 +92,9 @@ The only files it writes:
 4. Extract the zip to a folder you keep, for example `Documents\Tobii Guard`.
 5. *(Recommended)* Open `tobii-guard.ahk` in Notepad and read it.
 6. Double-click `tobii-guard.ahk`. A green **H** icon appears in the system tray.
-7. Right-click the tray icon and tick **Start with Windows** to run it at every sign-in.
+7. On first run it asks **"Start Tobii Guard automatically every time you sign in to Windows?"** Click **Yes**.
+
+That's the whole setup. From then on it starts by itself at every sign-in and runs quietly in the tray; there is nothing to toggle. You can change the startup choice any time from the tray menu.
 
 You can also skip the zip entirely and download `tobii-guard.ahk` straight from this repository. It is the same file.
 

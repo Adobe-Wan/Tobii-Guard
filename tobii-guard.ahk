@@ -12,7 +12,9 @@
 ;   - ends it only if its file path is Tobii's own install path (see ALLOWED_PATHS)
 ;   - leaves it running while the Tobii Experience window is open on screen
 ;   - writes a small log to %LOCALAPPDATA%\TobiiGuard\log.txt (rotated at 100 KB)
-;   - optionally creates/deletes ONE shortcut in your own Startup folder (tray menu)
+;   - writes an empty "setup-done" marker there after the one-time first-run question
+;   - optionally creates/deletes ONE shortcut in your own Startup folder (first-run
+;     question or tray menu)
 ; It refuses to run as administrator, makes no network connections, writes nothing
 ; to the registry and starts no other programs (except Explorer, if you click
 ; "Open log folder" in the tray menu).
@@ -41,6 +43,7 @@ LOG_DIR := EnvGet("LOCALAPPDATA") "\TobiiGuard"
 LOG_FILE := LOG_DIR "\log.txt"
 LOG_MAX_BYTES := 100000
 STARTUP_LINK := A_Startup "\Tobii Guard.lnk"
+FIRST_RUN_MARKER := LOG_DIR "\setup-done"
 
 ; Least privilege: Interaction runs as the signed-in user, so admin rights are never
 ; needed. Refuse them so the script can never act on other users' processes.
@@ -56,6 +59,7 @@ skipping := false
 lastIssuePid := 0   ; logs a stuck process once, not every check
 
 BuildTrayMenu()
+AskStartWithWindowsOnce()
 Log("started v" VERSION)
 SetTimer(Check, CHECK_INTERVAL_MS)
 Check()
@@ -179,6 +183,25 @@ ToggleStartup(*) {
             "Tobii Guard: keeps Tobii's PeekerWindow from breaking G-SYNC")
         A_TrayMenu.Check("Start with Windows")
         Log("start with Windows: on")
+    }
+}
+
+; On the very first run only, offer to start automatically at every sign-in.
+; The answer is remembered; it can be changed any time from the tray menu.
+AskStartWithWindowsOnce() {
+    if FileExist(FIRST_RUN_MARKER)
+        return
+    if !FileExist(STARTUP_LINK) {
+        answer := MsgBox("Start Tobii Guard automatically every time you sign in to Windows?`n`n"
+            . "You can change this later from the tray icon (Start with Windows).",
+            "Tobii Guard", "YesNo Iconi")
+        if (answer = "Yes")
+            ToggleStartup()
+    }
+    try {
+        if !DirExist(LOG_DIR)
+            DirCreate(LOG_DIR)
+        FileAppend("", FIRST_RUN_MARKER)
     }
 }
 

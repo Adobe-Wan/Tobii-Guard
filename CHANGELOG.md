@@ -9,4 +9,5 @@ First public release.
 - Leaves it running while the Tobii Experience window is open on screen.
 - Refuses to run as administrator.
 - Logs to `%LOCALAPPDATA%\TobiiGuard\log.txt` (rotated at about 100 KB).
+- Asks once on first run whether to start with Windows.
 - Tray menu: Pause, Start with Windows, Open log folder, About, Exit.

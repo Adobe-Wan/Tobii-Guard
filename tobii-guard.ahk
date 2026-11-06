@@ -16,8 +16,9 @@
 ;   - optionally creates/deletes ONE shortcut in your own Startup folder (first-run
 ;     question or tray menu)
 ; It refuses to run as administrator, makes no network connections, writes nothing
-; to the registry and starts no other programs (except Explorer, if you click
-; "Open log folder" in the tray menu).
+; to the registry and starts no other programs, with two exceptions you trigger from
+; the tray menu: Explorer ("Open log folder") and Tobii's own Interaction, from its
+; install path ("Pause and restore Tobii", for when Tobii Experience needs it).
 
 #Requires AutoHotkey v2.0
 #SingleInstance Force
@@ -147,6 +148,7 @@ BuildTrayMenu() {
     tray := A_TrayMenu
     tray.Delete()
     tray.Add("Pause", TogglePause)
+    tray.Add("Pause and restore Tobii", PauseAndRestoreTobii)
     tray.Add("Start with Windows", ToggleStartup)
     tray.Add("Open log folder", OpenLogFolder)
     tray.Add()
@@ -169,6 +171,30 @@ TogglePause(*) {
         Log("resumed")
         Check()
     }
+}
+
+; For when Tobii Experience needs Interaction, for example to reset or recalibrate:
+; pauses checking and starts Interaction again from Tobii's own install path.
+; Click Pause afterwards to resume.
+PauseAndRestoreTobii(*) {
+    if !paused
+        TogglePause()
+    if ProcessExist(TARGET_EXE)
+        return
+    for exe in ALLOWED_PATHS {
+        if FileExist(exe) {
+            SplitPath(exe, , &exeDir)
+            try {
+                Run('"' exe '"', exeDir)
+                Log("paused and restarted " TARGET_EXE)
+                return
+            }
+        }
+    }
+    Log("could not restart " TARGET_EXE ": not found at Tobii's install path")
+    MsgBox("Tobii Guard is paused, but it could not find " TARGET_EXE " to start it again.`n`n"
+        . "Restarting Tobii Service (services.msc) usually brings it back.",
+        "Tobii Guard", "Icon!")
 }
 
 ; Creates or removes a single shortcut in the current user's Startup folder.

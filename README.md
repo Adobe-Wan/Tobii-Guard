@@ -103,6 +103,7 @@ You can also skip the zip entirely and download `tobii-guard.ahk` straight from 
 | Item | Does |
 |---|---|
 | Pause | Temporarily stops checking (for example, to demo the problem). |
+| Pause and restore Tobii | Pauses and starts Interaction again, for when Tobii Experience needs it (reset, recalibration). Click **Pause** afterwards to resume. |
 | Start with Windows | Adds or removes the shortcut in your Startup folder. |
 | Open log folder | Opens `%LOCALAPPDATA%\TobiiGuard` in Explorer. |
 | About | Version and link to this page. |

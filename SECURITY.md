@@ -14,7 +14,7 @@ Tobii Guard is a single plain-text AutoHotkey v2 script. Its security properties
 | Narrow target | A process is ended only if its name is exactly `Tobii.EyeX.Interaction.exe` **and** its full path is exactly `%ProgramFiles%\Tobii\Tobii EyeX\Tobii.EyeX.Interaction.exe` (or the `Program Files (x86)` equivalent). Both are case-insensitive exact matches, not substring or wildcard matches. If the path cannot be read, nothing is ended. |
 | No network | The script contains no networking calls. |
 | No registry | The script contains no registry calls. |
-| No code execution | The script runs no other programs, with one exception: `explorer.exe` to open the log folder when you click **Open log folder**. It does not read or evaluate any external input, configuration file or command-line argument. |
+| No code execution | The script runs no other programs, with two exceptions, both only when you click them in the tray menu: `explorer.exe` to open the log folder (**Open log folder**), and Tobii's own `Tobii.EyeX.Interaction.exe`, only from the same exact install path it is allowed to end (**Pause and restore Tobii**). It does not read or evaluate any external input, configuration file or command-line argument. |
 | Bounded file writes | Only `%LOCALAPPDATA%\TobiiGuard\log.txt` (rotated at about 100 KB to `log.txt.old`), an empty `setup-done` marker in the same folder, and, if you opt in, one shortcut in your own Startup folder. The log contains timestamps, process IDs and file paths of the target process only. |
 | No persistence without consent | Nothing starts automatically unless you answer **Yes** to the one-time first-run question or tick **Start with Windows**. You can untick it at any time. |
 
